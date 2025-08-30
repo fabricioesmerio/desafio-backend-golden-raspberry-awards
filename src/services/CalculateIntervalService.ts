@@ -22,42 +22,59 @@ export class CalculateIntervalService {
     }
 
     private getResponseInterval(producersWithLeastTwoWins: ResponseItem[]): ResponseInterval {
-        
+
         if (producersWithLeastTwoWins.length === 0) return { max: [], min: [] }
 
-        const minInterval = producersWithLeastTwoWins.reduce((p, c) => p.interval < c.interval ? p : c);
-        const maxInterval = producersWithLeastTwoWins.reduce((p, c) => p.interval > c.interval ? p : c);
-        
-        const response: ResponseInterval = {
-            min: producersWithLeastTwoWins.filter(item => item.interval === minInterval.interval),
-            max: producersWithLeastTwoWins.filter(item => item.interval === maxInterval.interval)
+        let min = Infinity;
+        let max = -Infinity;
+        let minItems: ResponseItem[] = [], maxItems: ResponseItem[] = [];
+
+        for (const item of producersWithLeastTwoWins) {
+            if (item.interval < min) {
+                min = item.interval;
+                minItems = [item];
+            } else if (item.interval === min) {
+                minItems.push(item)
+            }
+
+            if (item.interval > max) {
+                max = item.interval;
+                maxItems = [item];
+            } else if (item.interval === max) {
+                maxItems.push(item);
+            }
         }
 
-        return response;
+        return {
+            max: maxItems,
+            min: minItems
+        }
     }
 
     private getProducersWithLeastTwoWins(producersWin: Record<string, number[]>): Array<ResponseItem> {
         const producersWithLeastTwoWins: Array<ResponseItem> = [];
 
-        Object.entries(producersWin)
-            .forEach(([name, years]) => {
+        for (const [name, years] of Object.entries(producersWin)) {
+            if (years.length <= 1) continue;
 
-                if (years.length <= 1) return;
+            let minYear = Infinity;
+            let maxYear = -Infinity;
 
-                const tempYears = [...years.sort((a, b) => a > b ? 1 : -1)];
-                const lastYear = Number(tempYears.pop());
-                const firstYear = Number(tempYears.pop());
-                const interval = Math.abs(lastYear - firstYear);
+            for (const currentYear of years) {
+                if (currentYear < minYear) minYear = currentYear;
+                if (currentYear > maxYear) maxYear = currentYear;
+            }
 
-                if (Number.isNaN(interval)) return;
+            const interval = maxYear - minYear;
+            if (interval <= 0 || Number.isNaN(interval)) continue;
 
-                producersWithLeastTwoWins.push({
-                    producer: name,
-                    interval: interval,
-                    previousWin: firstYear,
-                    followingWin: lastYear
-                })
-            });
+            producersWithLeastTwoWins.push({
+                producer: name,
+                interval: interval,
+                previousWin: minYear,
+                followingWin: maxYear
+            })
+        }
 
         return producersWithLeastTwoWins;
     }
