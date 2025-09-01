@@ -3,7 +3,7 @@ import { ResponseItem, ResponseInterval } from "src/types/Response";
 
 export class CalculateIntervalService {
 
-    resolve(rows: SqlValue[][]): ResponseInterval {
+    resolve(rows: [string, number][]): ResponseInterval {
         const producersWin: Record<string, number[]> = {};
 
         for (const [producer, year] of rows) {
@@ -57,23 +57,20 @@ export class CalculateIntervalService {
         for (const [name, years] of Object.entries(producersWin)) {
             if (years.length <= 1) continue;
 
-            let minYear = Infinity;
-            let maxYear = -Infinity;
+            const sortedYears = years.sort((a, b) => a - b);
 
-            for (const currentYear of years) {
-                if (currentYear < minYear) minYear = currentYear;
-                if (currentYear > maxYear) maxYear = currentYear;
+            for (let i = 1; i < sortedYears.length; i++) {
+                const interval = sortedYears[i] - sortedYears[i - 1];
+
+                if (interval <= 0 || Number.isNaN(interval)) continue;
+                producersWithLeastTwoWins.push({
+                    producer: name,
+                    interval: interval,
+                    previousWin: sortedYears[i - 1],
+                    followingWin: sortedYears[i]
+                })
+
             }
-
-            const interval = maxYear - minYear;
-            if (interval <= 0 || Number.isNaN(interval)) continue;
-
-            producersWithLeastTwoWins.push({
-                producer: name,
-                interval: interval,
-                previousWin: minYear,
-                followingWin: maxYear
-            })
         }
 
         return producersWithLeastTwoWins;
