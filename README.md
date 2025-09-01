@@ -6,11 +6,13 @@ A API possui **uma rota principal**:
 
 ## Rota
 
-- **GET** `/api/intervals`
+- **GET** `http://localhost:3000/intervals`
 
   Retorna um JSON com:
   - `max`: produtor com maior intervalo entre dois prêmios consecutivos.
-  - `min`: produtor que obteve dois prêmios consecutivos mais rapidamente. **Exemplo de resposta:**
+  - `min`: produtor que obteve dois prêmios consecutivos mais rapidamente. 
+  
+  **Exemplo de resposta:**
   ```json
   {
     "max": {
@@ -78,9 +80,9 @@ npm run test
 
 ## Estrutura do projeto
 
-- `src/routes` – define as rotas da API.
+- `src/app` – define as rotas da API.
 - `src/repositories` – lógica de manipulação dos dados salvo em memória.
-- `src/services` – serviços de leitura de CSV e cálculo de intervalos.
+- `src/services` – serviços de carregamento e leitura de CSV e cálculo de intervalos.
 - `data` – arquivos de dados CSV usados pela API.
 
 ---
