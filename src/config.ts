@@ -1,1 +1,0 @@
-export const CSV_PATH = process.env.CSV_PATH || "data/movielist.csv";

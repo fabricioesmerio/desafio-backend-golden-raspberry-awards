@@ -1,22 +1,19 @@
 import express from 'express';
-import path from 'path';
-import fs from 'fs';
-import { insert, setup } from './repositories/MoviesRepository';
-import { CsvImporterService } from './services/CsvImporterService';
-import router from './routes/route';
-import { CSV_PATH } from './config';
+import type { MoviesRepository } from "./repositories/MovieRepository";
+import { ResponseInterval } from './types/Response';
+import { CalculateIntervalService } from './services/CalculateIntervalService';
 
-export async function createApp() {
+
+export function createApp(deps: { repo: MoviesRepository }) {
   const app = express();
 
-  await setup();
+  app.get("/intervals", (_req, res) => {
+    const rows = deps.repo.findAllWinners();
+    const result: ResponseInterval =
+      new CalculateIntervalService().resolve(rows);
+    res.json(result);
+  });
 
-  const csvPath = path.resolve(CSV_PATH);
-  const csvText = fs.readFileSync(csvPath, 'utf-8');
-  const moviesList = CsvImporterService.resolve(csvText);
-  insert(moviesList);
-
-  app.use('/api', router);
 
   return app;
 }
